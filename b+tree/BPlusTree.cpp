@@ -53,7 +53,7 @@ void BPlusTree::insert(int data, int addr)
 void BPlusTree::insertInLeaf(BPlusTreeNode* leaf, int data, int addr)
 {
 	int index = 0;
-	while (leaf->getData(index) < data)
+	while (leaf->getData(index) < data && index < leaf->getDataLength())
 		index++;
 
 	for (int i = leaf->getDataLength(); i > index; i--)
