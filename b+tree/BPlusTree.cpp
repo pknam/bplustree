@@ -74,7 +74,32 @@ void BPlusTree::insertInParent(BPlusTreeNode* leaf1, int data, BPlusTreeNode* le
 
 BPlusTreeNode* BPlusTree::findNode(int data)
 {
-	// implementing
+	BPlusTreeNode* result;
 
-	return nullptr;
+	if (root == nullptr)
+		return nullptr;
+	else
+		result = root;
+
+	while (result->getType() != BPlusTreeNode::NodeType::LEAF)
+	{
+		int next_child_index = 0;
+		for (int i = 0; i < result->getDataLength(); i++)
+		{
+			if (result->getData(i) > data)
+			{
+				next_child_index = i;
+			}
+			else
+			{
+				next_child_index = i + 1;
+				break;
+			}
+		}
+		
+		result = result->getChild(next_child_index);
+	}
+
+
+	return result;
 }

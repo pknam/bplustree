@@ -19,7 +19,7 @@ public:
 
 	void insert(int data, int addr);
 
-private:
+private:	// utility methods
 	void insertInLeaf(BPlusTreeNode* leaf, int data, int addr);
 	void insertInParent(BPlusTreeNode* leaf1, int data, BPlusTreeNode* leaf2);
 	BPlusTreeNode* findNode(int data);
