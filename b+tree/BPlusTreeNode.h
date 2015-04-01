@@ -55,8 +55,12 @@ public:
 			delete[] addr;
 		else
 		{
-			for (int i = 0; i < dataLength + 1; i++)
-				delete children[i];
+			// except temporary node
+			if (dataLength > 0)
+			{
+				for (int i = 0; i < dataLength + 1; i++)
+					delete children[i];
+			}
 
 			delete[] children;
 		}

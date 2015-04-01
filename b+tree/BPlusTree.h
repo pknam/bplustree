@@ -14,7 +14,7 @@ public:
 
 	~BPlusTree()
 	{
-		// 모든 node 돌면서 delete
+		delete root;
 	}
 
 	void insert(int data, int addr);

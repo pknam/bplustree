@@ -132,17 +132,22 @@ void BPlusTree::insertInParent(BPlusTreeNode* leaf, int data, BPlusTreeNode* new
 
 		BPlusTreeNode* newparent = new BPlusTreeNode(n, BPlusTreeNode::NodeType::INNER);
 
-		for (int i = 0, j = 0; i < n + 1; i++)
+		parent->setChild(0, tmp.getChild(0));
+		for (int i = 0, j = 0; i < n; i++)
 		{
 			if (i < n / 2)
 			{
 				parent->setData(i, tmp.getData(i));
 				parent->setChild(i + 1, tmp.getChild(i + 1));
 			}
+			else if (i == n / 2)
+			{
+				newparent->setChild(j, tmp.getChild(i + 1));
+			}
 			else if (i > n / 2)
 			{
 				newparent->setData(j, tmp.getData(i));
-				newparent->setChild(j + 1, tmp.getChild(j + 1));
+				newparent->setChild(j + 1, tmp.getChild(i + 1));
 				j++;
 			}
 		}
@@ -150,7 +155,8 @@ void BPlusTree::insertInParent(BPlusTreeNode* leaf, int data, BPlusTreeNode* new
 		parent->setDataLength(n / 2);
 		newparent->setDataLength(n - n / 2 - 1);
 
-		newleaf->setParent(newparent);
+		for (int i = 0; i < newparent->getDataLength() + 1; i++)
+			newparent->getChild(i)->setParent(newparent);
 
 
 		insertInParent(parent, tmp.getData(n / 2), newparent);
