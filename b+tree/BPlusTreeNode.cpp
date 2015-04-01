@@ -35,11 +35,6 @@ void BPlusTreeNode::setData(int index, int data)
 	this->data[index] = data;
 }
 
-void BPlusTreeNode::removeData(int index)
-{
-	// implementing
-}
-
 int BPlusTreeNode::getDataLength()
 {
 	return dataLength;
@@ -50,17 +45,22 @@ void BPlusTreeNode::setDataLength(int length)
 	dataLength = length;
 }
 
-int BPlusTreeNode::getAddr(int index)
+int* BPlusTreeNode::getAddr(int index)
 {
 	return addr[index];
 }
 
-void BPlusTreeNode::setAddr(int index, int addr)
+void BPlusTreeNode::setAddr(int index, int* addr)
 {
 	this->addr[index] = addr;
 }
 
-void BPlusTreeNode::removeAddr(int index)
+BPlusTreeNode* BPlusTreeNode::getNextLeafNode()
 {
-	// implementing
+	return nextLeafNode;
+}
+
+void BPlusTreeNode::setNextLeafNode(BPlusTreeNode* node)
+{
+	nextLeafNode = node;
 }

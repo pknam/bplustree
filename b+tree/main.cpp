@@ -16,7 +16,8 @@ int main()
 	bptree.insert(5, 6);
 	bptree.insert(9, 7);
 	bptree.insert(6, 8);
-	//bptree.insert(10, 9);
+	bptree.insert(10, 9);
+	bptree.insert(0, 10);
 
 
 	cout << "sdfsdf" << endl;

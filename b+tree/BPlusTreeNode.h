@@ -18,15 +18,18 @@ private:
 	// pointer of parent
 	BPlusTreeNode* parent;
 
-	// array of child pointer
-	// InnerNode : 
-	BPlusTreeNode** children;
-
 	// data array
 	int* data;
 
+	// array of child pointer
+	// ONLY used in inner node
+	BPlusTreeNode** children;
+
 	// ONLY used in leaf node
-	int* addr;
+	int** addr;
+
+	// ONLY used in leaf node
+	BPlusTreeNode* nextLeafNode;
 
 	// number of data in this node
 	int dataLength;
@@ -36,26 +39,27 @@ public:
 		: n(_n), type(_type), dataLength(0)
 	{
 		if (_type == NodeType::LEAF)
-			addr = new int[_n - 1];
+			addr = new int*[_n - 1];
+		else
+			children = new BPlusTreeNode*[_n];
 
 		data = new int[_n - 1];
-		children = new BPlusTreeNode*[_n];
 
-		for (int i = 0; i < _n; i++)
-			children[i] = nullptr;
 	}
 
 	~BPlusTreeNode()
 	{
-		for (int i = 0; i < n; i++)
-			if (children[i])
-				delete children[i];
-
-		delete[] children;
 		delete[] data;
 
 		if (type == NodeType::LEAF)
 			delete[] addr;
+		else
+		{
+			for (int i = 0; i < dataLength + 1; i++)
+				delete children[i];
+
+			delete[] children;
+		}
 	}
 
 public:
@@ -69,12 +73,13 @@ public:
 
 	int getData(int index);
 	void setData(int index, int data);
-	void removeData(int index);
 
-	int getAddr(int index);
-	void setAddr(int index, int addr);
-	void removeAddr(int index);
+	int* getAddr(int index);
+	void setAddr(int index, int* addr);
 
 	int getDataLength();
 	void setDataLength(int length);
+
+	BPlusTreeNode* getNextLeafNode();
+	void setNextLeafNode(BPlusTreeNode* node);
 };

@@ -8,7 +8,7 @@ void BPlusTree::insert(int data, int addr)
 	{
 		BPlusTreeNode* tmp = new BPlusTreeNode(n, BPlusTreeNode::NodeType::LEAF);
 		tmp->setData(0, data);
-		tmp->setAddr(0, addr);
+		tmp->setAddr(0, (int*) addr);
 		tmp->setDataLength(1);
 
 		root = tmp;
@@ -18,7 +18,7 @@ void BPlusTree::insert(int data, int addr)
 	BPlusTreeNode* leaf = findNode(data);
 	if (leaf->getDataLength() < n - 1)
 	{
-		insertInLeaf(leaf, data, addr);
+		insertInLeaf(leaf, data, (int*) addr);
 	}
 	else // need to split leaf
 	{
@@ -26,7 +26,7 @@ void BPlusTree::insert(int data, int addr)
 		BPlusTreeNode* newleaf = new BPlusTreeNode(n, BPlusTreeNode::NodeType::LEAF);
 		BPlusTreeNode tmp(n + 1, BPlusTreeNode::NodeType::LEAF);
 
-		insertInLeaf(&tmp, data, addr);
+		insertInLeaf(&tmp, data, (int*) addr);
 		for (int i = 0; i < n - 1; i++)
 			insertInLeaf(&tmp, leaf->getData(i), leaf->getAddr(i));
 
@@ -46,14 +46,16 @@ void BPlusTree::insert(int data, int addr)
 		}
 
 		// connect links
-		newleaf->setChild(n - 1, leaf->getChild(n - 1));
-		leaf->setChild(n - 1, newleaf);
+		//newleaf->setChild(n - 1, leaf->getChild(n - 1));
+		newleaf->setNextLeafNode(leaf->getNextLeafNode());
+		//leaf->setChild(n - 1, newleaf);
+		leaf->setNextLeafNode(newleaf);
 
 		insertInParent(leaf, newleaf->getData(0), newleaf);
 	}
 }
 
-void BPlusTree::insertInLeaf(BPlusTreeNode* leaf, int data, int addr)
+void BPlusTree::insertInLeaf(BPlusTreeNode* leaf, int data, int* addr)
 {
 	int index = 0;
 	while (leaf->getData(index) < data && index < leaf->getDataLength())
@@ -66,7 +68,7 @@ void BPlusTree::insertInLeaf(BPlusTreeNode* leaf, int data, int addr)
 	}
 
 	leaf->setData(index, data);
-	leaf->setAddr(index, addr);
+	leaf->setAddr(index, (int*) addr);
 	leaf->setDataLength(leaf->getDataLength() + 1);
 }
 
@@ -98,6 +100,8 @@ void BPlusTree::insertInParent(BPlusTreeNode* leaf, int data, BPlusTreeNode* new
 		parent->setData(index, data);
 		parent->setChild(index + 1, newleaf);
 		parent->setDataLength(parent->getDataLength() + 1);
+
+		newleaf->setParent(parent);
 	}
 	else // split parent
 	{
@@ -145,6 +149,8 @@ void BPlusTree::insertInParent(BPlusTreeNode* leaf, int data, BPlusTreeNode* new
 
 		parent->setDataLength(n / 2);
 		newparent->setDataLength(n - n / 2 - 1);
+
+		newleaf->setParent(newparent);
 
 
 		insertInParent(parent, tmp.getData(n / 2), newparent);
