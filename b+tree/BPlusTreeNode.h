@@ -60,7 +60,9 @@ public:
 
 public:
 	NodeType getType();
+
 	BPlusTreeNode* getParent();
+	void setParent(BPlusTreeNode* node);
 
 	BPlusTreeNode* getChild(int index);
 	void setChild(int index, BPlusTreeNode* node);

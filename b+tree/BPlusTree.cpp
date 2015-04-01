@@ -24,23 +24,26 @@ void BPlusTree::insert(int data, int addr)
 	{
 		// right side of leaf
 		BPlusTreeNode* newleaf = new BPlusTreeNode(n, BPlusTreeNode::NodeType::LEAF);
+		BPlusTreeNode tmp(n + 1, BPlusTreeNode::NodeType::LEAF);
 
-		// copy (n/2) ~ n
-		for (int i = n / 2, j = 0; i < n; i++, j++)
+		insertInLeaf(&tmp, data, addr);
+		for (int i = 0; i < n - 1; i++)
+			insertInLeaf(&tmp, leaf->getData(i), leaf->getAddr(i));
+
+		leaf->setDataLength(0);
+		newleaf->setDataLength(0);
+
+		for (int i = 0; i < n; i++)
 		{
-			newleaf->setData(j, leaf->getData(i));
-			newleaf->setAddr(j, leaf->getAddr(i));
+			if (i < n / 2)
+			{
+				insertInLeaf(leaf, tmp.getData(i), tmp.getAddr(i));
+			}
+			else
+			{
+				insertInLeaf(newleaf, tmp.getData(i), tmp.getAddr(i));
+			}
 		}
-
-		// set data length
-		leaf->setDataLength(n / 2);
-		newleaf->setDataLength(n - n / 2);
-
-		// insert new data
-		if (data < newleaf->getData(0))
-			insertInLeaf(leaf, data, addr);
-		else
-			insertInLeaf(newleaf, data, addr);
 
 		// connect links
 		newleaf->setChild(n - 1, leaf->getChild(n - 1));
@@ -67,9 +70,85 @@ void BPlusTree::insertInLeaf(BPlusTreeNode* leaf, int data, int addr)
 	leaf->setDataLength(leaf->getDataLength() + 1);
 }
 
-void BPlusTree::insertInParent(BPlusTreeNode* leaf1, int data, BPlusTreeNode* leaf2)
+void BPlusTree::insertInParent(BPlusTreeNode* leaf, int data, BPlusTreeNode* newleaf)
 {
-	// implementing
+	if (leaf == root)
+	{
+		BPlusTreeNode* tmp = new BPlusTreeNode(n, BPlusTreeNode::NodeType::INNER);
+		tmp->setData(0, data);
+		tmp->setChild(0, leaf);
+		tmp->setChild(1, newleaf);
+		tmp->setDataLength(1);
+
+		leaf->setParent(tmp);
+		newleaf->setParent(tmp);
+
+		root = tmp;
+
+		return;
+	}
+
+	BPlusTreeNode* parent = leaf->getParent();
+	if (parent->getDataLength() < n - 1)
+	{
+		int index = 0;
+		while (parent->getData(index) < data && index < parent->getDataLength())
+			index++;
+
+		parent->setData(index, data);
+		parent->setChild(index + 1, newleaf);
+		parent->setDataLength(parent->getDataLength() + 1);
+	}
+	else // split parent
+	{
+		// right side of parent
+		BPlusTreeNode tmp(n + 1, BPlusTreeNode::NodeType::INNER);
+		bool inserted = false;
+
+		tmp.setChild(0, parent->getChild(0));
+		for (int i = 0, j = 0; i < n; i++)
+		{
+			// i : index of tmp
+			// j : index of parent
+
+			if (parent->getData(j) > data && !inserted)
+			{
+				tmp.setData(i, data);
+				tmp.setChild(i + 1, newleaf);
+				inserted = true;
+			}
+			else
+			{
+				tmp.setData(i, parent->getData(j));
+				tmp.setChild(i + 1, parent->getChild(j + 1));
+				j++;
+			}
+		}
+
+
+		BPlusTreeNode* newparent = new BPlusTreeNode(n, BPlusTreeNode::NodeType::INNER);
+
+		for (int i = 0, j = 0; i < n + 1; i++)
+		{
+			if (i < n / 2)
+			{
+				parent->setData(i, tmp.getData(i));
+				parent->setChild(i + 1, tmp.getChild(i + 1));
+			}
+			else if (i > n / 2)
+			{
+				newparent->setData(j, tmp.getData(i));
+				newparent->setChild(j + 1, tmp.getChild(j + 1));
+				j++;
+			}
+		}
+
+		parent->setDataLength(n / 2);
+		newparent->setDataLength(n - n / 2 - 1);
+
+
+		insertInParent(parent, tmp.getData(n / 2), newparent);
+	}
 }
 
 BPlusTreeNode* BPlusTree::findNode(int data)
@@ -83,21 +162,11 @@ BPlusTreeNode* BPlusTree::findNode(int data)
 
 	while (result->getType() != BPlusTreeNode::NodeType::LEAF)
 	{
-		int next_child_index = 0;
-		for (int i = 0; i < result->getDataLength(); i++)
-		{
-			if (result->getData(i) > data)
-			{
-				next_child_index = i;
-			}
-			else
-			{
-				next_child_index = i + 1;
-				break;
-			}
-		}
-		
-		result = result->getChild(next_child_index);
+		int index = 0;
+		while (result->getData(index) < data && index < result->getDataLength())
+			index++;
+
+		result = result->getChild(index);
 	}
 
 

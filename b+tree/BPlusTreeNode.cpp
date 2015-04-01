@@ -10,6 +10,11 @@ BPlusTreeNode* BPlusTreeNode::getParent()
 	return parent;
 }
 
+void BPlusTreeNode::setParent(BPlusTreeNode* node)
+{
+	parent = node;
+}
+
 BPlusTreeNode* BPlusTreeNode::getChild(int index)
 {
 	return children[index];
